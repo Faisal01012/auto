@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auto Capture Image</title>
+</head>
+<body>
+    <h1>Capturing image...</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+
+    <script>
+        // الوصول إلى عناصر HTML
+        var video = document.getElementById('video');
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+
+        // الوصول إلى كاميرا الويب
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+                // انتظر حتى يتم تشغيل الفيديو والتقاط الصورة بعد فترة قصيرة
+                video.onloadedmetadata = function() {
+                    setTimeout(captureImage, 2000); // التقاط الصورة بعد 2 ثانية
+                };
+            })
+            .catch(function(err) {
+                console.log("An error occurred: " + err);
+            });
+
+        // وظيفة لالتقاط الصورة وحفظها
+        function captureImage() {
+            context.drawImage(video, 0, 0, 640, 480);
+            var dataURL = canvas.toDataURL('image/png');
+            downloadImage(dataURL, 'captured_image.png');
+        }
+
+        // وظيفة لحفظ الصورة كملف
+        function downloadImage(data, filename = 'captured_image.png') {
+            var a = document.createElement('a');
+            a.href = data;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
